@@ -32,7 +32,7 @@ Note: Error handling has been skipped for brevity.
 
 
 For reading Proximity, Ambient Light, White Light, and  setting Interrupts see 
-the more [complete example here](example/). 
+the more [complete example here](example/main.go). 
 
 
 
