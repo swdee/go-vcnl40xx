@@ -4,7 +4,7 @@ go-vcnl40xx is an I2C driver for the Vishay VCNL40xx series of integrated
 proximity and ambient light sensors.  
 
 Currently it supports models [VCNL4040](https://www.vishay.com/docs/84274/vcnl4040.pdf), 
-[VCNL3030](https://www.vishay.com/docs/84250/vcnl4030x01.pdf), and 
+[VCNL4030](https://www.vishay.com/docs/84250/vcnl4030x01.pdf), and 
 [VCNL4035](https://www.vishay.com/docs/84251/vcnl4035x01.pdf).
 
 
