@@ -1,30 +1,75 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"github.com/swdee/go-vcnl40xx"
 	"log"
+	"strconv"
 	"time"
-)
-
-const (
-	// The I2C bus your sensor is connect on
-	I2cDevice = "/dev/i2c-0"
 )
 
 func main() {
 
-	sensor, err := vcnl40xx.NewVCNL4040(I2cDevice, vcnl40xx.VCNL4040Address)
+	// read in cli flags
+	model := flag.String("m", "4040", "Sensor model number [4040|4030|3035]")
+	i2cbus := flag.String("b", "/dev/i2c-0", "Path to I2C bus to use")
+	addr := flag.String("a", "", "Hex address of sensor on I2C bus")
+	flag.Parse()
+
+	var useModel vcnl40xx.Model
+	var useAddr uint8
+
+	switch *model {
+	case "4030":
+		useModel = vcnl40xx.VCNL4030
+		useAddr = vcnl40xx.VCNL40301XAddress
+
+	case "4035":
+		useModel = vcnl40xx.VCNL4035
+		useAddr = vcnl40xx.VCNL4035XAddress
+
+	case "4040":
+		useModel = vcnl40xx.VCNL4040
+		useAddr = vcnl40xx.VCNL4040Address
+
+	default:
+		log.Fatalf("Unknown sensor model: %s\n", *model)
+	}
+
+	if *addr != "" {
+		intValue, err := strconv.ParseInt(*addr, 0, 64)
+
+		if err != nil || intValue > 255 {
+			log.Fatalf("Error casting sensor hex address: %v", err)
+		}
+
+		useAddr = uint8(intValue)
+	}
+
+	sensor, err := vcnl40xx.NewSensor(useModel)
 
 	if err != nil {
-		log.Fatalf("Error initializing driver: %v\n", err)
+		log.Fatalf("Error creating sensor: %v\n", err)
+	}
+
+	err = sensor.Connect(*i2cbus, useAddr)
+
+	if err != nil {
+		log.Fatalf("Error connecting to sensor: %v\n", err)
+	}
+
+	err = sensor.Init()
+
+	if err != nil {
+		log.Fatalf("Error initializing sensor: %v\n", err)
 	}
 
 	configureInterrupt(sensor)
 	readValues(sensor)
 }
 
-func readValues(sensor *vcnl40xx.VCNL4040) {
+func readValues(sensor *vcnl40xx.Sensor) {
 
 	for {
 		time.Sleep(1 * time.Second)
@@ -57,7 +102,7 @@ func readValues(sensor *vcnl40xx.VCNL4040) {
 	}
 }
 
-func configureInterrupt(sensor *vcnl40xx.VCNL4040) {
+func configureInterrupt(sensor *vcnl40xx.Sensor) {
 
 	// if sensor sees a value higher than this, interrupt pin will go LOW
 	err := sensor.SetProximityHighThreshold(2000)
