@@ -12,7 +12,7 @@ import (
 func main() {
 
 	// read in cli flags
-	model := flag.String("m", "4040", "Sensor model number [4040|4030|3035]")
+	model := flag.String("m", "4040", "Sensor model number [4040|4030|4035]")
 	i2cbus := flag.String("b", "/dev/i2c-0", "Path to I2C bus to use")
 	addr := flag.String("a", "", "Hex address of sensor on I2C bus")
 	flag.Parse()
