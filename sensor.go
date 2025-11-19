@@ -2,6 +2,7 @@ package vcnl40xx
 
 import (
 	"fmt"
+
 	"github.com/swdee/go-i2c"
 )
 
@@ -20,7 +21,7 @@ const (
 	ProximityPersistance4 ProximityPersistance = 4
 )
 
-// ProximityPersistance defines the ambient persistance types
+// AmbientPersistance defines the ambient persistance types
 type AmbientPersistance uint8
 
 const (
@@ -186,7 +187,8 @@ func (s *Sensor) PowerOffAmbient() error {
 // 200, 400, or 800
 func (s *Sensor) SetAmbientIntegrationTime(timeValue uint16) error {
 
-	if s.model == VCNL4040 {
+	switch s.model {
+	case VCNL4040:
 		if timeValue >= 640 {
 			timeValue = uint16(s.reg.ALS_IT_640MS)
 		} else if timeValue >= 320 {
@@ -197,7 +199,7 @@ func (s *Sensor) SetAmbientIntegrationTime(timeValue uint16) error {
 			timeValue = uint16(s.reg.ALS_IT_80MS)
 		}
 
-	} else if s.model == VCNL4030 {
+	case VCNL4030, VCNL4035:
 		if timeValue >= 800 {
 			timeValue = uint16(s.reg.ALS_IT_800MS)
 		} else if timeValue >= 400 {
@@ -209,6 +211,10 @@ func (s *Sensor) SetAmbientIntegrationTime(timeValue uint16) error {
 		} else {
 			timeValue = uint16(s.reg.ALS_IT_50MS)
 		}
+
+	default:
+		// Optional: fail loudly for unsupported models
+		return fmt.Errorf("ambient integration time not supported for model %v", s.model)
 	}
 
 	return s.bitMask(s.cc.ALS_CONF, LOWER, s.reg.ALS_IT_MASK, byte(timeValue))
